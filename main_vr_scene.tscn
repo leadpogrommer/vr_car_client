@@ -1,0 +1,86 @@
+[gd_scene load_steps=17 format=3 uid="uid://detqxtyqneffb"]
+
+[ext_resource type="Script" path="res://MainVrScene.cs" id="1_ug48m"]
+[ext_resource type="PackedScene" path="res://addons/godot-xr-tools/misc/vr_common_shader_cache.tscn" id="2_i2bsi"]
+[ext_resource type="Script" path="res://addons/godot-xr-tools/player/player_body.gd" id="5_7ur5p"]
+[ext_resource type="PackedScene" uid="uid://b4kad2kuba1yn" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/left_hand_low.tscn" id="5_vsd8j"]
+[ext_resource type="Shader" path="res://stereo_screen.gdshader" id="6_0cf45"]
+[ext_resource type="PackedScene" uid="uid://l2n30mpbkdyw" path="res://addons/godot-xr-tools/hands/scenes/lowpoly/right_hand_low.tscn" id="6_8nj3h"]
+[ext_resource type="Texture2D" uid="uid://bvls7p76s8amm" path="res://Name_1m x 1m.png" id="6_c64we"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_i5cpg"]
+
+[sub_resource type="Sky" id="Sky_tlsn6"]
+sky_material = SubResource("ProceduralSkyMaterial_i5cpg")
+
+[sub_resource type="Environment" id="Environment_1rwdt"]
+background_mode = 2
+sky = SubResource("Sky_tlsn6")
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_iumv8"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_qut5d"]
+render_priority = 0
+shader = ExtResource("6_0cf45")
+
+[sub_resource type="QuadMesh" id="QuadMesh_lxmkd"]
+material = SubResource("ShaderMaterial_qut5d")
+size = Vector2(6.4, 4.8)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rhsbv"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_54hd5"]
+albedo_texture = ExtResource("6_c64we")
+uv1_scale = Vector3(100, 100, 100)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_0scuc"]
+material = SubResource("StandardMaterial3D_54hd5")
+size = Vector2(100, 100)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_ug48m")
+
+[node name="XROrigin3D" type="XROrigin3D" parent="."]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+
+[node name="VRCommonShaderCache" parent="XROrigin3D/XRCamera3D" instance=ExtResource("2_i2bsi")]
+
+[node name="LeftHand" type="XRController3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1, -0.5)
+tracker = &"left_hand"
+
+[node name="LeftHand" parent="XROrigin3D/LeftHand" instance=ExtResource("5_vsd8j")]
+
+[node name="RightHand" type="XRController3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1, -0.5)
+tracker = &"right_hand"
+
+[node name="RightHand" parent="XROrigin3D/RightHand" instance=ExtResource("6_8nj3h")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0110093, 2.38419e-07, -0.00236082)
+
+[node name="XRToolsPlayerBody" type="CharacterBody3D" parent="XROrigin3D"]
+top_level = true
+script = ExtResource("5_7ur5p")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1rwdt")
+camera_attributes = SubResource("CameraAttributesPractical_iumv8")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.162371, -0.758658, 0.630931, 0.189081, 0.65149, 0.734717, -0.968444, 0, 0.249231, 0, 0, 0)
+
+[node name="Screen" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0, 3.25542, -5.00623)
+mesh = SubResource("QuadMesh_lxmkd")
+
+[node name="Floor" type="StaticBody3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_rhsbv")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Floor"]
+mesh = SubResource("PlaneMesh_0scuc")
