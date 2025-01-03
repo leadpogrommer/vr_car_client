@@ -8,13 +8,21 @@ using System.Threading;
 using vr_test;
 
 
-public partial class MainVrScene : Node3D
-{
+
+public partial class MainVrScene : Node3D {
+
+	private Object _mlock;
 	private XRInterface _xrInterface;
 	private CameraFeedReceiver _leftReceiver;
 	private CameraFeedReceiver _rightReceiver;
 	private ImageTexture _leftTexture;
 	private ImageTexture _rightTexture;
+
+	// private string leftAddr = "cam-00.local";
+	// private string rightAddr = "cam-60.local";
+	
+	private string leftAddr = "192.168.2.49";
+	private string rightAddr = "192.168.2.105";
 
 	public override void _Ready() {
 		InitXr();
@@ -27,10 +35,10 @@ public partial class MainVrScene : Node3D
 		mat.SetShaderParameter("right_texture", _rightTexture);
 		
 		// 00 and 60
-		_leftReceiver = new CameraFeedReceiver("[Left  cam]", "cam-00.local", 55556, _leftTexture);
+		_leftReceiver = new CameraFeedReceiver("[Left  cam]", leftAddr, 55556, _leftTexture);
 		_leftReceiver.Start();
 		
-		_rightReceiver = new CameraFeedReceiver("[Right cam]", "cam-60.local", 55557, _rightTexture);
+		_rightReceiver = new CameraFeedReceiver("[Right cam]", rightAddr, 55557, _rightTexture);
 		_rightReceiver.Start();
 	}
 
@@ -57,4 +65,5 @@ public partial class MainVrScene : Node3D
 		_rightReceiver.Stop();
 		base.Dispose(disposing);
 	}
+	
 }
