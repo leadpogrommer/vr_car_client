@@ -17,12 +17,18 @@ public partial class MainVrScene : Node3D {
 	private CameraFeedReceiver _rightReceiver;
 	private ImageTexture _leftTexture;
 	private ImageTexture _rightTexture;
+	private XRController3D _leftController;
+	private XRController3D _rightController;
+	private UdpClient _controlClient;
 
-	// private string leftAddr = "cam-00.local";
-	// private string rightAddr = "cam-60.local";
+	private string leftAddr = "cam-00.local";
+	private string rightAddr = "cam-60.local";
+	private string controllerAddr = "car-controller.local";
 	
-	private string leftAddr = "192.168.2.49";
-	private string rightAddr = "192.168.2.105";
+	// private string leftAddr = "192.168.2.49";
+	// private string rightAddr = "192.168.2.105";
+	
+	
 
 	public override void _Ready() {
 		InitXr();
@@ -40,7 +46,31 @@ public partial class MainVrScene : Node3D {
 		
 		_rightReceiver = new CameraFeedReceiver("[Right cam]", rightAddr, 55557, _rightTexture);
 		_rightReceiver.Start();
+
+
+		_leftController = GetNode<XRController3D>("XROrigin3D/LeftHand");
+		_rightController = GetNode<XRController3D>("XROrigin3D/RightHand");
+		
+		
+		var alist = Dns.GetHostAddresses(controllerAddr);
+		var ep = new IPEndPoint(alist[0], 55555);
+		_controlClient = new UdpClient(55510);
+		_controlClient.Connect(ep);
 	}
+
+
+	private byte GetControllerValue(XRController3D cont) {
+		var raw = cont.GetVector2("primary").Y;
+		return (byte)System.Convert.ToSByte(-raw * 127);
+	}
+	public override void _PhysicsProcess(double delta) {
+		base._PhysicsProcess(delta);
+		// var res = GetNode<XRController3D>("XROrigin3D/LeftHand").GetVector2("primary");
+		// GD.Print($"Left hand stick is {res}");
+
+		_controlClient.Send(new byte[] { GetControllerValue(_leftController), GetControllerValue(_rightController) });
+	}
+
 
 	private void InitXr() {
 		_xrInterface = XRServer.FindInterface("OpenXR");
